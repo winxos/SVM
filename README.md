@@ -2,9 +2,11 @@
 
 ## About This Project
 
-Alpha version can run now.
+Alpha version can work now.
 
 winxos 2016-12-18
+
+------
 
 
 

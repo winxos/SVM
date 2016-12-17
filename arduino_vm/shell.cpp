@@ -3,7 +3,7 @@ enum INPUT_STATE {SHELL, INPUT_CODE};
 INPUT_STATE input_state = SHELL;
 void help(void)
 {
-  puts("AISTLAB ARDUINO VM 1.0\n");
+  puts("ARDUINO VM HELP");
   puts("ls [list inner files]");
   puts("load xx[load and run inner file]");
   puts("code xx[run machine code xx]");

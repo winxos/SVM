@@ -101,8 +101,7 @@ int step_SML() //
       break;
     case HALT: return false;
       break;
-    case _INPUT: printf("INPUT:");
-      scanf("%d", &MEM[operand]);
+    case _INPUT:
       break;
     case PRINT: printf("%d ", MEM[operand]);
       break;
