@@ -2,6 +2,12 @@
 
 ## About This Project
 
+Alpha version can run now.
+
+winxos 2016-12-18
+
+
+
 This project is an extension of [SML](https://github.com/AISTLAB/SML), SML is for the teaching purpose, and this project pretend to migrate SML to Arduino UNO or other MCU platform, and can use to real project.
 
 The VM's main part contain:
