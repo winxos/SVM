@@ -1,0 +1,32 @@
+# VM DETAIL
+
+> winxos 2016-12-19
+
+## HARDWARE
+
+Currently supported ATMEGA 328P, ATMEGA 2560.
+
+## MACHINE CODE FORMAT
+
+Operator code: 	8bit
+
+Operand:		8bit
+
+Registers:		ADDER	32bit
+
+Stacks:
+
+## INSTRUCTIONS
+
+INPUT = 10, PRINT, LOAD = 20, STORE, SET,
+
+ADD = 30, SUB, MUL, DIV, MOD, INC, DEC, NEG,
+
+JMP = 40, JMPN, JMPZ, HALT,INT
+
+AND = 50, OR, XOR,
+
+PUSH = 60, POP,
+
+PMOD=70,DWP,DRP,AWP,ARP,
+
