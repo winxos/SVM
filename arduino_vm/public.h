@@ -31,5 +31,8 @@ extern void shell();
 
 extern void dump();
 extern void init_SML();
+extern bool step_SML();
 extern bool input_single_code(int code);
 
+extern long total_instructions;
+extern bool RUN_VM;

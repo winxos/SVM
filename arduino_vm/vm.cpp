@@ -10,7 +10,7 @@ int MEM[MAX_MEM] = {0};
 long ADDER = 0; //ONLY MAX_MEN MEMORY, ONE REGISTER ADDER
 #define MAX_STACK 30
 int STACK[MAX_STACK] = {0};
-
+bool RUN_VM = false;
 enum
 {
   _INPUT = 10, PRINT, LOAD = 20, STORE, SET,
@@ -53,7 +53,7 @@ void init_SML()
   memset(MEM, 0, sizeof(int) * MAX_MEM);
 }
 
-int step_SML() //
+bool step_SML() //
 {
   if (pcode >= MAX_MEM)
     return false;
@@ -112,17 +112,7 @@ int step_SML() //
     return false;
   return true;
 }
-void runSML()
-{
-  total_instructions = 1;
-  unsigned long t = millis();
-  while (step_SML())
-  {
-    total_instructions++;
-  }
-  printf("\nTotal run %ld instructions. used %ld ms.\n", total_instructions, millis() - t);
-  dump();
-}
+
 int li = 0;
 bool input_single_code(int code)
 {
@@ -130,7 +120,7 @@ bool input_single_code(int code)
   {
     puts("-1");
     li = 0;
-    runSML();
+    RUN_VM = true;
     return false;
   }
   MEM[li++] = (code / 100) | (code % 100 << 8);
