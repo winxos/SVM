@@ -34,7 +34,22 @@ static void _stop()
 }
 static void _ls()
 {
-  puts("NOT FINISHED");
+  FILE_INFO tmp;
+  printf("%8s\t\t%s\n","NAME","SIZE");
+  int i, total_size = 0;
+  for (i = 0; i < max_file_number; i++)
+  {
+    if (get_file_by_index(i, &tmp) == FILE_SUCCESS)
+    {
+      printf("%8s\t\t%d\n", tmp.name, tmp.size);
+      total_size += tmp.size;
+    }
+    else
+    {
+      break;
+    }
+  }
+  printf("\t\t%d FILES\t\t%d BYTES\n", i, total_size);
 }
 static void _rm()
 {

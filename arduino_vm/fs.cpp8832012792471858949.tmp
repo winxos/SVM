@@ -1,6 +1,13 @@
 #include "public.h"
 #include <EEPROM.h>
-
+struct FILE_INFO {
+  char name[MAX_NAME_LEN];
+  u16 start_address;
+  u16 size;
+  u8 state; //normal, read only, hide, opening delete?
+  u8 xor_sum; //
+};
+typedef FILE_INFO *pFILE_INFO;
 struct FS_HEAD {
   u8 fs_type; //file system type
   u8 fs_version; //for update migrate
@@ -18,7 +25,7 @@ static struct FS_HEAD fs_head = {
 
 const u8 file_xor_sum_offset = 0xE5;
 u16 file_tail = fs_head.fs_file_start_address;
-u8 max_file_number = 0;
+
 u8 calc_xor_sum(FILE_INFO f) {
   u8 xor_sum = file_xor_sum_offset;
   u8 *p = (u8 *) &f;
@@ -36,7 +43,7 @@ int is_valid_file(FILE_INFO f) {
 
 int find_file(char name[], FILE_INFO *fout, u16 *out_table_address) {
   int i, ffta = fs_head.fs_file_table_address;
-  int len = max_file_number;
+  int len = (fs_head.fs_file_start_address - ffta) / sizeof(FILE_INFO);
   for (i = 0; i < len; i++)
   {
     FILE_INFO TMP;
@@ -62,24 +69,23 @@ static void _write_eeproms(u8 *buf, u16 address, u16 len)
 {
   for (int i = 0; i < len; i++)
   {
-    EEPROM.write(address + i, buf[i]);
+    EEPROM[address + i] = buf[i];
   }
 }
 static void _set_eeproms(u8 value, u16 address, u16 len)
 {
   for (int i = 0; i < len; i++)
   {
-    EEPROM.write(address + i, value);
+    EEPROM[address + i] = value;
   }
 }
 static void _read_eeproms(u8 *buf, u16 address, u16 len)
 {
   for (int i = 0; i < len; i++)
   {
-    buf[i] = EEPROM.read(address + i);
+    buf[i] = EEPROM[address + i];
   }
 }
-
 int init_file_system() {
   FS_HEAD tmp;
   EEPROM.get(0, tmp);
@@ -88,7 +94,6 @@ int init_file_system() {
     EEPROM.put(0, fs_head);
     _set_eeproms(0, fs_head.fs_file_table_address, sizeof(FILE_INFO));
   }
-  max_file_number = (fs_head.fs_file_start_address - fs_head.fs_file_table_address) / sizeof(FILE_INFO);
   return FILE_SUCCESS;
 }
 
@@ -119,17 +124,7 @@ int write_file(char name[], u8 buf[], u8 len) {
   }
   return ret;
 }
-int get_file_by_index(u8 index, FILE_INFO *out)
-{
-  FILE_INFO TMP;
-  EEPROM.get(fs_head.fs_file_table_address + index * sizeof(FILE_INFO), TMP);
-  if (is_valid_file(TMP))
-  {
-    memcpy(out, &TMP, sizeof(FILE_INFO));
-    return  FILE_SUCCESS;
-  }
-  return FILE_NOT_EXIST;
-}
+
 int delete_file(char name[]) {
   FILE_INFO TMP;
   u16 file_table_address;
@@ -141,23 +136,13 @@ int delete_file(char name[]) {
   }
   return ret;
 }
+
 void test_fs()
 {
-  char buf[40] = "aaa";
-  int c = write_file("prime", buf, 40);
-  printf("write:%s state:%d\n", "prime", c);
+  char buf[10] = "hello";
+  write_file("file1",buf,10);
   char buf2[10];
-  c = read_file("file2", buf2);
-  printf("read:%s state:%d\n", buf2, c);
-  for (int i = 0; i < fs_head.fs_file_table_address + 4 * sizeof(FILE_INFO); i++)
-  {
-    int c = EEPROM.read(i);
-    printf("%d\t\t%d\t%c\n", i, c, c);
-  }
-  for (int i = fs_head.fs_file_start_address; i < fs_head.fs_file_start_address + 20; i++)
-  {
-    int c = EEPROM.read(i);
-    printf("%d\t\t%d\t%c\n", i, c, c);
-  }
+  read_file("hello",buf2);
+  printf("read:%s",buf2);
 }
 

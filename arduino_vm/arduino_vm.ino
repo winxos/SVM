@@ -2,6 +2,7 @@
 
 void setup() {
   vm_init();
+  //test_fs();
 }
 
 void loop() {

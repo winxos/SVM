@@ -41,14 +41,23 @@ extern bool RUN_VM;
 
 /* fs.cpp       */
 enum RETURN_CODE {
-  FILE_SUCCESS, FILE_NOT_EXIST = -1, FILE_ALREADY_EXIST = -2, FILE_REACH_MAX=-3,DISK_NOT_ENOUGH = -4, DISK_FULL = -5,
+  FILE_SUCCESS, FILE_NOT_EXIST = -1, FILE_ALREADY_EXIST = -2, FILE_REACH_MAX = -3, DISK_NOT_ENOUGH = -4, DISK_FULL = -5,
 };
 enum FILE_STATE {
   NORMAL = 0x01, READ_ONLY = 0x02, HIDE = 0x04, OPENING = 0x08, DELETED = 0x10
 };
 #define MAX_NAME_LEN 8
-
-int init_file_system();
-int read_file(char name[], u8 buf[]);
-int write_file(char name[], u8 buf[], u8 len);
-int delete_file(char name[]);
+struct FILE_INFO {
+  char name[MAX_NAME_LEN];
+  u16 start_address;
+  u16 size;
+  u8 state; //normal, read only, hide, opening delete?
+  u8 xor_sum; //
+};
+extern int init_file_system();
+extern int read_file(char name[], u8 buf[]);
+extern int write_file(char name[], u8 buf[], u8 len);
+extern int delete_file(char name[]);
+extern void test_fs();
+extern int get_file_by_index(u8 index, FILE_INFO *out);
+extern u8 max_file_number;
