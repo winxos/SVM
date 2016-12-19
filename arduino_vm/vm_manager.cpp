@@ -13,7 +13,7 @@ void serialEvent()
     receive_data(Serial.read());
   }
 }
-unsigned long st;
+unsigned long st = 0;
 void vm_run_command()
 {
   if (frame_ready)
@@ -22,19 +22,15 @@ void vm_run_command()
   }
   if (RUN_VM)
   {
-    if (total_instructions == 0)
+    if (st == 0)
     {
       st = millis();
     }
-    if (step_SML())
-    {
-      total_instructions++;
-    }
-    else
+    if (!step_SML())
     {
       RUN_VM = false;
       printf("\nTotal run %ld instructions. used %ld ms.\n", total_instructions, millis() - st);
-      total_instructions = 0;
+      st = 0;
       dump();
     }
   }

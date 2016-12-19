@@ -33,8 +33,8 @@ static void _dump()
 }
 static void _stop()
 {
-  init_SML();
   RUN_VM = false;
+  puts("VM STOPED");
 }
 static int cmd_index(char *s)
 {
@@ -59,6 +59,10 @@ void shell(void)
     if (cmdi >= 0)
     {
       CMDS[cmdi].execute();
+    }
+    else
+    {
+      printf("%s NOT EXIST, TYPE help FOR SUPPORTED COMMANDS\n", buf);
     }
   }
   else if (input_state == INPUT_CODE)

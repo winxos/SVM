@@ -8,16 +8,20 @@
 #define MAX_MEM 100
 int MEM[MAX_MEM] = {0};
 long ADDER = 0; //ONLY MAX_MEN MEMORY, ONE REGISTER ADDER
+u8 rega, regb, regc, regd;
 #define MAX_STACK 30
 int STACK[MAX_STACK] = {0};
 bool RUN_VM = false;
 enum
 {
-  _INPUT = 10, PRINT, LOAD = 20, STORE, SET,
+  _INPUT = 10, PRINT, 
+  LOAD = 20, STORE, SET,
   ADD = 30, SUB, MUL, DIV, MOD, INC, _DEC, NEG,
   JMP = 40, JMPN, JMPZ, HALT,
   AND = 50, OR, XOR,
-  PUSH = 60, POP
+  PUSH = 60, POP, SREGA, SREGB, SREGC, SREGD,
+  PMOD = 70, DWP, DRP, AWP, ARP,
+  SLP = 80,
 };
 
 #define COLS 10
@@ -46,17 +50,16 @@ void dump() //Pretty Show Memory For Debugging
 
 int operand, pcode, pstack;
 long total_instructions;
-
+long slp_ct = 0;
 void init_SML()
 {
   operand = 0, pcode = 0, pstack = 0, total_instructions = 0;
   memset(MEM, 0, sizeof(int) * MAX_MEM);
 }
-
+bool START_CLOCK = false;
 bool step_SML() //
 {
-  if (pcode >= MAX_MEM)
-    return false;
+  total_instructions++;
   u8 *op = (u8*)&MEM[pcode];    //xxbb
   operand = *(op + 1);
   switch (*op)
@@ -83,6 +86,50 @@ bool step_SML() //
       break;
     case MOD: ADDER %= MEM[operand];
       break;
+    case SREGA: rega = ADDER;
+      break;
+    case SREGB: regb = ADDER;
+      break;
+    case SREGC: regc = ADDER;
+      break;
+    case SREGD: regd = ADDER;
+      break;
+    case PMOD:
+      pinMode(operand, ADDER);
+      break;
+    case DWP:
+      digitalWrite(operand, ADDER);
+      break;
+    case DRP:
+      ADDER = digitalRead(operand);
+      break;
+    case AWP:
+      analogWrite(operand, ADDER);
+      break;
+    case ARP:
+      ADDER = analogRead(operand);
+      break;
+    case SLP://sleep
+      if (!START_CLOCK)
+      {
+        START_CLOCK = true;
+        slp_ct = millis();
+        total_instructions--; //not finished , so can't caculate the count.
+        return true;//
+      }
+      else
+      {
+        if (millis() - slp_ct < operand*10)
+        {
+          total_instructions--; //not finished , so can't caculate the count.
+          return true;
+        }
+        else //sleep finished
+        {
+          START_CLOCK = false;
+        }
+      }
+      break;
     case INC: MEM[operand]++;
       break;
     case _DEC: MEM[operand]--;
@@ -107,8 +154,7 @@ bool step_SML() //
       break;
     default: break;
   }
-  pcode++;
-  if (pcode >= MAX_MEM)
+  if (++pcode >= MAX_MEM)
     return false;
   return true;
 }
