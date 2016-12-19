@@ -12,9 +12,14 @@ u8 rega, regb, regc, regd;
 #define MAX_STACK 30
 int STACK[MAX_STACK] = {0};
 bool RUN_VM = false;
+
+int operand, pcode, pstack;
+unsigned long total_instructions;
+long slp_ct = 0;
+
 enum
 {
-  _INPUT = 10, PRINT, 
+  _INPUT = 10, PRINT,
   LOAD = 20, STORE, SET,
   ADD = 30, SUB, MUL, DIV, MOD, INC, _DEC, NEG,
   JMP = 40, JMPN, JMPZ, HALT,
@@ -32,7 +37,8 @@ enum
 void dump() //Pretty Show Memory For Debugging
 {
   int i;
-  printf("\nADDER:%4d, MEMORY:\n%3s", ADDER, "");
+  printf("\nSystem started %ld ms ago, runned %ld Instructions\n", millis(), total_instructions);
+  printf("ADDER:%4d, MEMORY:\n%3s", ADDER, "");
   for (i = 0; i < COLS; i++)
   {
     printf(TITLE_FORMAT, i);
@@ -48,9 +54,7 @@ void dump() //Pretty Show Memory For Debugging
   puts("\n");
 }
 
-int operand, pcode, pstack;
-long total_instructions;
-long slp_ct = 0;
+
 void init_SML()
 {
   operand = 0, pcode = 0, pstack = 0, total_instructions = 0;
@@ -64,13 +68,13 @@ bool step_SML() //
   operand = *(op + 1);
   switch (*op)
   {
+    case JMP: pcode = operand - 1;
+      break;
     case LOAD: ADDER = MEM[operand];
       break;
     case STORE: MEM[operand] = ADDER;
       break;
     case SET: ADDER = operand;
-      break;
-    case JMP: pcode = operand - 1;
       break;
     case JMPN: ADDER < 0 ? pcode = operand - 1 : 0;
       break;
@@ -119,7 +123,7 @@ bool step_SML() //
       }
       else
       {
-        if (millis() - slp_ct < operand*10)
+        if (millis() - slp_ct < operand * 10)
         {
           total_instructions--; //not finished , so can't caculate the count.
           return true;
