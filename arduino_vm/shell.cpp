@@ -1,61 +1,88 @@
 #include "public.h"
 enum INPUT_STATE {SHELL, INPUT_CODE};
 INPUT_STATE input_state = SHELL;
-void help(void)
+u8 cmd_count = 0;
+#define MAX_CMD_COUNT 10
+static struct CMD {
+  char *_name;
+  char *_help;
+  void (*execute)();
+} CMDS[MAX_CMD_COUNT];
+static void _help()
 {
-  puts("ARDUINO VM HELP");
-  puts("ls [list inner files]");
-  puts("load xx[load and run inner file]");
-  puts("code xx[run machine code xx]");
-  puts("input [interactive mode]");
-  puts("dump [show vm memory]");
+  printf("COMMANDS COUNT (%d)\n", cmd_count);
+  for (int i = 0; i < cmd_count; i++)
+  {
+    printf("%s\t\t%s\n", CMDS[i]._name, CMDS[i]._help);
+  }
 }
+static void _ls()
+{
 
+}
+static void _input()
+{
+  puts("\nEnter -1 to end input.\n");
+  init_SML();
+  printf("00 ? ");
+  input_state = INPUT_CODE;
+}
+static void _dump()
+{
+  dump();
+}
+static void _stop()
+{
+  init_SML();
+  RUN_VM = false;
+}
+static int cmd_index(char *s)
+{
+  for (int i = 0; i < cmd_count; i++)
+  {
+    if (strcmp(CMDS[i]._name, s) == 0)
+    {
+      return i;
+    }
+  }
+  return -1;
+}
 void shell(void)
 {
   struct FRAME *fbuf = get_frame();
   if (input_state == SHELL)
   {
-    u8 *buf = fbuf->data;
-    char dst[3][80] = {{0}, {0}, {0}};
-    split(dst, (char *) buf, " ");
-    puts(buf);
-    if (0 == strcmp(dst[0], "ls") || 0 == strcmp(dst[0], "dir"))
+    char *buf = fbuf->data;
+    //char dst[3][80] = {{0}, {0}, {0}};
+    //split(dst, (char *) buf, " ");
+    int cmdi = cmd_index(buf);
+    if (cmdi >= 0)
     {
-
-    }
-    else if (0 == strcmp(dst[0], "help"))
-    {
-      help();
-    }
-    else if (0 == strcmp(dst[0], "load"))
-    {
-
-    }
-    else if (0 == strcmp(dst[0], "code"))
-    {
-
-    }
-    else if (0 == strcmp(dst[0], "input"))
-    {
-      puts("\nEnter -1 to end input.\n");
-      init_SML();
-      printf("00 ? ");
-      input_state = INPUT_CODE;
-    }
-    else if (0 == strcmp(dst[0], "dump"))
-    {
-      dump();
-    }
-    else if (0 == strcmp(dst[0], "p")) //protocol
-    {
+      CMDS[cmdi].execute();
     }
   }
   else if (input_state == INPUT_CODE)
   {
-    if(!input_single_code(atol(fbuf->data)))
+    if (!input_single_code(atol(fbuf->data)))
     {
       input_state = SHELL;
     }
   }
 }
+static void add_command(char *cname, void(*f)(), char * chelp)
+{
+  assert(chelp != NULL);
+  CMDS[cmd_count]._name = cname;
+  CMDS[cmd_count].execute = f;
+  CMDS[cmd_count]._help = chelp;
+  cmd_count++;
+}
+void init_shell()
+{
+  add_command("ls", _ls, "LIST FILES");
+  add_command("dump", _dump, "SHOW VM MEMORIES");
+  add_command("stop", _stop, "STOP THE VM RIGHT NOW");
+  add_command("input", _input, "SWITCH TO INTERACTIVE MODE");
+  add_command("help", _help, "HELP");
+}
+

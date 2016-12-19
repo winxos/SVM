@@ -5,6 +5,7 @@ void vm_init()
   Serial.begin(BAUD);
   printf("AISTLAB VM v%s\n", VERSION);
   printf("BAUD:%ld\n", BAUD);
+  init_shell();
 }
 void serialEvent()
 {

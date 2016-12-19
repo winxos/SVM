@@ -3,8 +3,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-#define VERSION "0.1"
+#include <assert.h>
+#define VERSION "0.2"
 #define BAUD 250000
 typedef uint8_t u8;
 
@@ -29,10 +29,11 @@ extern struct FRAME * get_frame();
 /* shell.cpp    */
 extern void shell();
 
+/* vm.cpp       */
 extern void dump();
 extern void init_SML();
 extern bool step_SML();
 extern bool input_single_code(int code);
-
+extern void init_shell();
 extern long total_instructions;
 extern bool RUN_VM;
