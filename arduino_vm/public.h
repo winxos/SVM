@@ -11,7 +11,7 @@ typedef unsigned short u16;
 
 /* public.cpp     */
 extern int serial_putc( char c, struct __file * );
-extern int split(char dst[][80], char *str, const char *spl);
+extern int split(char dst[][10], char *str, const char *spl);
 
 extern void vm_init();
 extern void serialEvent();

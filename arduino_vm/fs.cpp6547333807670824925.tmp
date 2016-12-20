@@ -67,22 +67,21 @@ int find_file_index(char name[], FILE_INFO *fout, u8 *out_index) {
   }
   return FILE_REACH_MAX;
 }
-static inline void _write_eeproms(u8 *buf, u16 address, u16 len)
+static void _write_eeproms(u8 *buf, u16 address, u16 len)
 {
   for (int i = 0; i < len; i++)
   {
     EEPROM.write(address + i, buf[i]);
   }
 }
-static inline void _set_eeproms( u16 address, u8 value, u16 len)
+static void _set_eeproms(u8 value, u16 address, u16 len)
 {
-  //printf("set ee: %d %d %d\n", value, address, len);
   for (int i = 0; i < len; i++)
   {
     EEPROM.write(address + i, value);
   }
 }
-static inline void _read_eeproms(u8 *buf, u16 address, u16 len)
+static void _read_eeproms(u8 *buf, u16 address, u16 len)
 {
   for (int i = 0; i < len; i++)
   {
@@ -96,7 +95,7 @@ int init_file_system() {
   if (strcmp(tmp.logo, fs_head.logo) != 0)
   {
     EEPROM.put(0, fs_head);
-    _set_eeproms(index_to_address(0), 0,  sizeof(FILE_INFO)*max_file_number);
+    _set_eeproms(0, index_to_address(0), sizeof(FILE_INFO)*max_file_number);
   }
   max_file_number = (fs_head.fs_file_start_address - fs_head.fs_file_table_address) / sizeof(FILE_INFO);
   return FILE_SUCCESS;
@@ -151,7 +150,11 @@ int delete_file(char name[]) {
   int ret = find_file_index(name, &TMP, &index);
   if (ret == FILE_SUCCESS)
   {
-    _set_eeproms(  index_to_address(index), 0, sizeof(FILE_INFO));
+    _set_eeproms(index_to_address(index), 0, sizeof(FILE_INFO));
+    for(int i=0;i<20;i++)
+    {
+      printf("%d\t%d\n",index_to_address(index)+i,EEPROM.read(index_to_address(index)+i));
+    }
   }
   return ret;
 }
@@ -169,6 +172,7 @@ void test_fs()
     int c = EEPROM.read(i);
     printf("%d\t\t%d\t%c\n", i, c, c);
   }
+  printf("s:%d\n", fs_head.fs_file_start_address);
   for (int i = fs_head.fs_file_start_address; i < fs_head.fs_file_start_address + 20; i++)
   {
     int c = EEPROM.read(i);

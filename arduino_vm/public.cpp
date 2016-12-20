@@ -6,7 +6,7 @@ int serial_putc( char c, struct __file * )
   return c;
 }
 
-int split(char dst[][80], char *str, const char *spl)//for single line chars split to words
+int split(char dst[][10], char *str, const char *spl)//for single line chars split to words
 {
     int n = 0;
     char *result = NULL;
