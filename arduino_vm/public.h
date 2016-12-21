@@ -3,12 +3,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
 #include <assert.h>
 #define VERSION "0.2"
 #define BAUD 250000
 typedef unsigned char u8;
 typedef unsigned short u16;
-
+#include "string_table.h"
+extern char STR_MEM_BUF[80];
+extern char *get_flash_str(char *str);
 /* public.cpp     */
 extern int serial_putc( char c, struct __file * );
 extern int split(char dst[][10], char *str, const char *spl);
@@ -55,7 +58,7 @@ struct FILE_INFO {
   u8 xor_sum; //
 };
 extern int init_file_system();
-extern int get_file(char name[],FILE_INFO *fout);
+extern int get_file(char name[], FILE_INFO *fout);
 extern int read_file(FILE_INFO FI, u8 buf[]);
 extern int write_file(char name[], u8 buf[], u8 len);
 extern int delete_file(char name[]);

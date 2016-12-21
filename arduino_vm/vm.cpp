@@ -37,19 +37,19 @@ enum
 void dump() //Pretty Show Memory For Debugging
 {
   int i;
-  printf("\nSystem started %ld ms ago, runned %ld Instructions\n", millis(), total_instructions);
-  printf("ADDER:%4d, MEMORY:\n%3s", ADDER, "");
+  printf(get_flash_str(MSG_VM_DUMP_HEADER_FMT), millis(), total_instructions);
+  printf(get_flash_str(MSG_VM_DUMP_HEADER2_FMT), ADDER, "");
   for (i = 0; i < COLS; i++)
   {
-    printf(TITLE_FORMAT, i);
+    printf(get_flash_str(TITLE_FORMAT), i);
   }
   for (i = 0; i < MAX_MEM; i++)
   {
     if (i % COLS == 0)
     {
-      printf(COL_HEADER_FORMAT, i / COLS);
+      printf(get_flash_str(COL_HEADER_FORMAT), i / COLS);
     }
-    printf(DATA_FORMAT, MEM[i]);
+    printf(get_flash_str(DATA_FORMAT), MEM[i]);
   }
   puts("\n");
 }
@@ -146,9 +146,9 @@ bool step_SML() //
       break;
     case XOR: ADDER = ADDER ^ MEM[operand];
       break;
-    case PUSH: pstack < MAX_STACK ? STACK[pstack++] = ADDER : puts("[warning] STACK OVERFLOW.");
+    case PUSH: pstack < MAX_STACK ? STACK[pstack++] = ADDER : puts(get_flash_str(MSG_VM_WARNING_STACK_OVERFLOW));
       break;
-    case POP: pstack > 0 ? ADDER = STACK[--pstack] : puts("[warning] STACK EMPTY.");
+    case POP: pstack > 0 ? ADDER = STACK[--pstack] : puts(get_flash_str(MSG_VM_WARNING_STACK_EMPTY));
       break;
     case HALT: return false;
       break;
@@ -195,23 +195,7 @@ bool input_single_code(int code)
 }
 void help_vm()
 {
-  printf("THIS MACHINE HAVE %d(int)MEMORY, %d(int)STACK\n", MAX_MEM, MAX_STACK);
-  puts("INSTRUCTION IS 4 DECIMAL DIGITS, FORMAT: AABB");
-  puts("AA IS OPERATOR, BB IS OPERAND");
-  puts("ONLY HAVE ONE REGISTER\n");
-  puts("INSTRUCTIONS:");
-  puts("\tINPUT:10\tPRINT:11\tLOAD:20\tSTORE:21\tSET:22");
-  puts("\tADD:30\tSUB:31\tMUL:32\tDIV:33\tMOD:34\tINC:35\tDEC:36\tNEG:37");
-  puts("\tJMP:40\tJMPN:41\tJMPZ:42");
-  puts("\tAND:50\tOR:51\tXOR:52");
-  puts("\tPUSH:60\tPOP:61");
-  puts("\tHALT:-1\n");
-  puts("THIS SHELL SUPPORTED COMMAND:");
-  puts("ls\t\t\t[list SML source codes]");
-  puts("help | ? \t\t[help]");
-  puts("load name.sml\t\t[load and run source code]");
-  puts("input\t\t\t[open code input mode]");
-  puts("exit\t\t\t[exit program]");
-  puts("dump\t\t\t[show memories]\n");
+  printf(get_flash_str(MSG_VM_HELP_HEADER_FMT), MAX_MEM, MAX_STACK);
+  puts(get_flash_str(MSG_VM_HELP_CONTENT));
 }
 

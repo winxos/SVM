@@ -101,7 +101,7 @@ int init_file_system() {
   max_file_number = (fs_head.fs_file_start_address - fs_head.fs_file_table_address) / sizeof(FILE_INFO);
   return FILE_SUCCESS;
 }
-int get_file(char name[],FILE_INFO *fout)
+int get_file(char name[], FILE_INFO *fout)
 {
   u8 index;
   return find_file_index(name, fout, &index);
@@ -156,18 +156,26 @@ int delete_file(char name[]) {
 
 void test_fs()
 {
-  char buf[40] = "sss";
-  int c = write_file("prime", buf, 40);
-  printf("write '%s' state:%d\n", "prime", c);
+  char buf[40] = "hello file.";
+  char fn[] = "prime";
+  int c = write_file(fn, buf, 40);
+  printf("write '%s' state:%d\n", fn, c);
+  FILE_INFO f;
+  if (FILE_SUCCESS == get_file(fn, &f))
+  {
+    u8 *fbuf = malloc(f.size);
+    read_file(f, fbuf);
+    printf(get_flash_str(MSG_VM_MANAGER_LOADED_CODE_FMT), f.name, f.size);
+  }
   for (int i = 0; i < index_to_address(2); i++)
   {
     int c = EEPROM.read(i);
-    printf("%d\t\t%d\t%c\n", i, c, c);
+    printf(" % d\t\t % d\t % c\n", i, c, c);
   }
   for (int i = fs_head.fs_file_start_address; i < fs_head.fs_file_start_address + 20; i++)
   {
     int c = EEPROM.read(i);
-    printf("%d\t\t%d\t%c\n", i, c, c);
+    printf(" % d\t\t % d\t % c\n", i, c, c);
   }
 }
 
