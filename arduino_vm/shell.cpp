@@ -20,6 +20,7 @@ static void _help(char args[2][10])
 static void _input(char args[2][10])
 {
   puts("\nEnter -1 to end input.\n");
+  RUN_VM = false;
   init_SML();
   printf("00 ? ");
   input_state = INPUT_CODE;
@@ -51,6 +52,10 @@ static void _ls(char args[2][10])
     }
   }
   printf("\t\t%d FILES\t\t%d BYTES\n", i, total_size);
+}
+static void _cat(char args[2][10])
+{
+
 }
 static void _rm(char args[2][10])
 {
@@ -116,9 +121,21 @@ void shell(void)
   }
   else if (input_state == INPUT_CODE)
   {
-    if (!input_single_code(atol(fbuf->data)))
+    if (atoi(fbuf->data) == -1)
     {
+      puts("-1");
+      RUN_VM = true;
       input_state = SHELL;
+    }
+    else
+    {
+      char tmp[7] = "0x";
+      memcpy(&tmp[2], fbuf->data, 4);
+      tmp[6] = 0;
+      if (!input_single_code(strtoul(tmp, 0, 16)))
+      {
+        input_state = SHELL;
+      }
     }
   }
 }
@@ -133,6 +150,7 @@ static void add_command(char *cname, void(*f)(), char * chelp)
 void init_shell()
 {
   add_command("ls", _ls, "LIST FILES");
+  add_command("cat", _cat, "SHOW FILE DATA");
   add_command("rm", _rm, "REMOVE FILES");
   add_command("ps", _ps, "PROCESS STATUS");
   add_command("kill", _rm, "KILL PROCESS");

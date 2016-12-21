@@ -38,7 +38,7 @@ extern bool input_single_code(int code);
 extern void init_shell();
 extern unsigned long total_instructions;
 extern bool RUN_VM;
-
+extern void run_code(u16 *fbuf, u8 sz);
 /* fs.cpp       */
 enum RETURN_CODE {
   FILE_SUCCESS, FILE_NOT_EXIST = -1, FILE_ALREADY_EXIST = -2, FILE_REACH_MAX = -3, DISK_NOT_ENOUGH = -4, DISK_FULL = -5,
@@ -55,7 +55,8 @@ struct FILE_INFO {
   u8 xor_sum; //
 };
 extern int init_file_system();
-extern int read_file(char name[], u8 buf[]);
+extern int get_file(char name[],FILE_INFO *fout);
+extern int read_file(FILE_INFO FI, u8 buf[]);
 extern int write_file(char name[], u8 buf[], u8 len);
 extern int delete_file(char name[]);
 extern void test_fs();

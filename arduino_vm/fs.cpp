@@ -101,16 +101,14 @@ int init_file_system() {
   max_file_number = (fs_head.fs_file_start_address - fs_head.fs_file_table_address) / sizeof(FILE_INFO);
   return FILE_SUCCESS;
 }
-
-int read_file(char name[], u8 buf[]) {
-  FILE_INFO TMP;
+int get_file(char name[],FILE_INFO *fout)
+{
   u8 index;
-  int ret = find_file_index(name, &TMP, &index);
-  if (ret == FILE_SUCCESS)
-  {
-    _read_eeproms(buf, TMP.start_address, TMP.size);
-  }
-  return ret;
+  return find_file_index(name, fout, &index);
+}
+int read_file(FILE_INFO FI, u8 buf[]) {
+  _read_eeproms(buf, FI.start_address, FI.size);
+  return FILE_SUCCESS;
 }
 
 int write_file(char name[], u8 buf[], u8 len) {
@@ -161,9 +159,6 @@ void test_fs()
   char buf[40] = "sss";
   int c = write_file("prime", buf, 40);
   printf("write '%s' state:%d\n", "prime", c);
-  char buf2[10];
-  c = read_file("prime", buf2);
-  printf("read '%s' state:%d\n", buf2, c);
   for (int i = 0; i < index_to_address(2); i++)
   {
     int c = EEPROM.read(i);

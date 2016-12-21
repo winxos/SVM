@@ -13,25 +13,25 @@ u8 rega, regb, regc, regd;
 int STACK[MAX_STACK] = {0};
 bool RUN_VM = false;
 
-int operand, pcode, pstack;
+int pcode, pstack;
 unsigned long total_instructions;
 long slp_ct = 0;
 
 enum
 {
-  _INPUT = 10, PRINT,
-  LOAD = 20, STORE, SET,
-  ADD = 30, SUB, MUL, DIV, MOD, INC, _DEC, NEG,
-  JMP = 40, JMPN, JMPZ, HALT,
-  AND = 50, OR, XOR,
-  PUSH = 60, POP, SREGA, SREGB, SREGC, SREGD,
-  PMOD = 70, DWP, DRP, AWP, ARP,
-  SLP = 80,
+  _INPUT = 0x10, PRINT,
+  LOAD = 0x20, STORE, SET,
+  ADD = 0x30, SUB, MUL, DIV, MOD, INC, _DEC, NEG,
+  JMP = 0x40, JMPN, JMPZ, HALT,
+  AND = 0x50, OR, XOR,
+  PUSH = 0x60, POP, SREGA, SREGB, SREGC, SREGD,
+  PMOD = 0x70, DWP, DRP, AWP, ARP,
+  SLP = 0x80,
 };
 
 #define COLS 10
 #define TITLE_FORMAT "%6X"
-#define DATA_FORMAT "%6d"
+#define DATA_FORMAT "  %04x"
 #define COL_HEADER_FORMAT "\n%3d"
 
 void dump() //Pretty Show Memory For Debugging
@@ -57,16 +57,16 @@ void dump() //Pretty Show Memory For Debugging
 
 void init_SML()
 {
-  operand = 0, pcode = 0, pstack = 0, total_instructions = 0;
+  pcode = 0, pstack = 0, total_instructions = 0;
   memset(MEM, 0, sizeof(int) * MAX_MEM);
 }
 bool START_CLOCK = false;
 bool step_SML() //
 {
   total_instructions++;
-  u8 *op = (u8*)&MEM[pcode];    //xxbb
-  operand = *(op + 1);
-  switch (*op)
+  u8 op = MEM[pcode] >> 8;  //xxbb
+  u8 operand = MEM[pcode] & 0x00FF;
+  switch (op)
   {
     case JMP: pcode = operand - 1;
       break;
@@ -162,19 +162,35 @@ bool step_SML() //
     return false;
   return true;
 }
-
+void run_code(u16 *fbuf, u8 sz)
+{
+  init_SML();
+  memcpy(MEM, fbuf, sz * sizeof(u16));
+  puts("run code:");
+  for (int i = 0; i < sz; i++)
+  {
+    printf("%2d:%04x\n", i, MEM[i]);
+  }
+  puts("");
+  RUN_VM = true;
+}
 int li = 0;
+int bcd_decode(int n)
+{
+  int ans = 0;
+  u8 sf = 0;
+  while (n > 0)
+  {
+    ans |= (n % 10) << sf;
+    sf += 4;
+    n /= 10;
+  }
+  return ans;
+}
 bool input_single_code(int code)
 {
-  if (code == -1)
-  {
-    puts("-1");
-    li = 0;
-    RUN_VM = true;
-    return false;
-  }
-  MEM[li++] = (code / 100) | (code % 100 << 8);
-  printf("%d\n%02d ? ", code, li);
+  MEM[li++] = code;
+  printf("%04x\n%02d ? ", code, li);
   return true;
 }
 void help_vm()
