@@ -18,6 +18,7 @@ const static struct FS_HEAD fs_head = {
 
 const u8 file_xor_sum_offset = 0xE5;
 u16 file_tail = fs_head.fs_file_start_address;
+
 u8 max_file_number = 0;
 u8 calc_xor_sum(FILE_INFO f) {
   u8 xor_sum = file_xor_sum_offset;
@@ -52,12 +53,18 @@ int find_file_index(char name[], FILE_INFO *fout, u8 *out_index) {
     int ret = get_file_by_index(i, &TMP);
     if (ret == FILE_SUCCESS)
     {
+      int t = TMP.start_address + TMP.size;
+      if (file_tail < t)
+      {
+        file_tail = t;
+      }
       if (0 == strcmp(TMP.name, name))
       {
         memcpy(fout , &TMP, sizeof(FILE_INFO));
         *out_index = i;
         return FILE_SUCCESS;
       }
+
     }
     else //for get empty file
     {

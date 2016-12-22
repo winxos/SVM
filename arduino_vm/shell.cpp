@@ -13,18 +13,18 @@ char hbuf[80];
 
 static void _help(char args[2][10])
 {
-  printf(get_flash_str(MSG_HELP_HEADER_FMT), cmd_count);
+  printf(GFS(MSG_HELP_HEADER_FMT), cmd_count);
   char hbuf[80], *p;
   for (int i = 0; i < cmd_count; i++)
   {
-    p = get_flash_str(CMDS[i]._help);
+    p = GFS(CMDS[i]._help);
     memcpy(hbuf, p, strlen(p) + 1);
-    printf(get_flash_str(MSG_HELP_ITMES_FMT), CMDS[i]._name, hbuf);
+    printf(GFS(MSG_HELP_ITMES_FMT), CMDS[i]._name, hbuf);
   }
 }
 static void _input(char args[2][10])
 {
-  puts(get_flash_str(MSG_INPUT_HINT));
+  puts(GFS(MSG_INPUT_HINT));
   RUN_VM = false;
   init_SML();
   puts("00 ? ");
@@ -37,23 +37,23 @@ static void _dump(char args[2][10])
 static void _start(char args[2][10])
 {
   RUN_VM = true;
-  puts(get_flash_str(MSG_VM_START));
+  puts(GFS(MSG_VM_START));
 }
 static void _stop(char args[2][10])
 {
   RUN_VM = false;
-  puts(get_flash_str(MSG_VM_STOPPED));
+  puts(GFS(MSG_VM_STOPPED));
 }
 static void _ls(char args[2][10])
 {
   FILE_INFO tmp;
-  puts(get_flash_str(MSG_LS_HEADER));
+  puts(GFS(MSG_LS_HEADER));
   int i, total_size = 0;
   for (i = 0; i < max_file_number; i++)
   {
     if (get_file_by_index(i, &tmp) == FILE_SUCCESS)
     {
-      printf(get_flash_str(MSG_LS_ITEMS_FMT), tmp.name, tmp.size);
+      printf(GFS(MSG_LS_ITEMS_FMT), tmp.name, tmp.size);
       total_size += tmp.size;
     }
     else
@@ -61,7 +61,7 @@ static void _ls(char args[2][10])
       break;
     }
   }
-  printf(get_flash_str(MSG_LS_SUMMARY_FMT), i, total_size);
+  printf(GFS(MSG_LS_SUMMARY_FMT), i, total_size);
 }
 static void _cat(char args[2][10])
 {
@@ -71,7 +71,7 @@ static void _cat(char args[2][10])
     u8 index;
     u16 *sbuf = malloc(tmp.size);
     read_file(tmp, (u8*)sbuf);
-    printf(get_flash_str(PSTR("'%s' content:\n")), tmp.name);
+    printf(GFS(PSTR("'%s' content:\n")), tmp.name);
     for (int i = 0; i < tmp.size / 2; i++)
     {
       printf("%5x", sbuf[i]);
@@ -83,15 +83,15 @@ static void _cat(char args[2][10])
 static void _rm(char args[2][10])
 {
   int ret = delete_file(args[0]);
-  printf(get_flash_str(MSG_RM_RETURN_CODE_FMT), args[0], ret);
+  printf(GFS(MSG_RM_RETURN_CODE_FMT), args[0], ret);
 }
 static void _ps(char args[2][10])
 {
-  puts(get_flash_str(MSG_NOT_FINISHED));
+  puts(GFS(MSG_NOT_FINISHED));
 }
 static void _kill(char args[2][10])
 {
-  puts(get_flash_str(MSG_NOT_FINISHED));
+  puts(GFS(MSG_NOT_FINISHED));
 }
 static void _load(char args[2][10])
 {
@@ -100,7 +100,7 @@ static void _load(char args[2][10])
   {
     u8 *fbuf = malloc(f.size);
     read_file(f, fbuf);
-    //printf(get_flash_str(MSG_VM_MANAGER_LOADED_CODE_FMT), f.name, f.size);
+    //printf(GFS(MSG_VM_MANAGER_LOADED_CODE_FMT), f.name, f.size);
     run_code((u16*)fbuf, f.size / sizeof(u16));
   }
 }
@@ -159,7 +159,7 @@ void shell(void)
     }
     else
     {
-      printf(get_flash_str(MSG_COMMAND_NOT_EXIST_FMT), buf);
+      printf(GFS(MSG_COMMAND_NOT_EXIST_FMT), buf);
     }
   }
   else if (input_state == INPUT_CODE)

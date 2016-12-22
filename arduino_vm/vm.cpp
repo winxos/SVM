@@ -37,8 +37,8 @@ enum
 void dump() //Pretty Show Memory For Debugging
 {
   int i;
-  printf(get_flash_str(MSG_VM_DUMP_HEADER_FMT), millis(), total_instructions);
-  printf(get_flash_str(MSG_VM_DUMP_HEADER2_FMT), ADDER, "");
+  printf(GFS(MSG_VM_DUMP_HEADER_FMT), millis(), total_instructions);
+  printf(GFS(MSG_VM_DUMP_HEADER2_FMT), ADDER, "");
   for (i = 0; i < COLS; i++)
   {
     printf(TITLE_FORMAT, i);
@@ -146,9 +146,9 @@ bool step_SML() //
       break;
     case XOR: ADDER = ADDER ^ MEM[operand];
       break;
-    case PUSH: pstack < MAX_STACK ? STACK[pstack++] = ADDER : puts(get_flash_str(MSG_VM_WARNING_STACK_OVERFLOW));
+    case PUSH: pstack < MAX_STACK ? STACK[pstack++] = ADDER : puts(GFS(MSG_VM_WARNING_STACK_OVERFLOW));
       break;
-    case POP: pstack > 0 ? ADDER = STACK[--pstack] : puts(get_flash_str(MSG_VM_WARNING_STACK_EMPTY));
+    case POP: pstack > 0 ? ADDER = STACK[--pstack] : puts(GFS(MSG_VM_WARNING_STACK_EMPTY));
       break;
     case HALT: return false;
       break;

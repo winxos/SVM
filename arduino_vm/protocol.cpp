@@ -5,7 +5,6 @@
 */
 #include "public.h"
 
-#define RAW_INPUT true
 #define ENABLE_CHECKSUM false
 
 #define FRAME_START 0xE5
@@ -32,57 +31,55 @@ u8 counter = 0;
 void receive_data(u8 data)
 {
   if (frame_ready) return;
-  if (RAW_INPUT)
+  switch (receive_state)
   {
-    if (data == '\n')
-    {
-      frame_buf.len = counter;
-      frame_ready = true;
-      counter = 0;
-    }
-    else
-    {
-      if (counter == 0)
+    case S_READY:
+      if (data == FRAME_START)
+        receive_state = S_LEN;
+      else//RAW INPUT
       {
-        memset(frame_buf.data, 0, BUF_MAX_LEN);
-      }
-      frame_buf.data[counter++] = data;
-    }
-  }
-  else
-  {
-    switch (receive_state)
-    {
-      case S_READY:
-        if (data == FRAME_START)
-          receive_state = S_LEN;
-        break;
-      case S_LEN:
-        frame_buf.len = data;
-        counter = 0;
-        receive_state = S_DATA;
-        break;
-      case S_DATA:
-        frame_buf.data[counter++] = data;
-        if (counter == frame_buf.len)
-          receive_state = S_VERIFY;
-        break;
-      case S_VERIFY:
-        if (ENABLE_CHECKSUM)
+        if (data == '\n')
         {
-          if (checksum(data) == true)
-          {
-            frame_ready = true;
-          }
+          frame_buf.len = counter;
+          frame_ready = true;
+          counter = 0;
         }
         else
         {
+          if (counter == 0)
+          {
+            memset(frame_buf.data, 0, BUF_MAX_LEN);
+          }
+          frame_buf.data[counter++] = data;
+        }
+      }
+      break;
+    case S_LEN:
+      memset(frame_buf.data, 0, BUF_MAX_LEN);
+      frame_buf.len = data;
+      counter = 0;
+      receive_state = S_DATA;
+      break;
+    case S_DATA:
+      frame_buf.data[counter++] = data;
+      if (counter == frame_buf.len)
+        receive_state = S_VERIFY;
+      break;
+    case S_VERIFY:
+      if (ENABLE_CHECKSUM)
+      {
+        if (checksum(data) == true)
+        {
           frame_ready = true;
         }
-        receive_state = S_READY;
-        break;
-      default: break;
-    }
+      }
+      else
+      {
+        frame_ready = true;
+      }
+      receive_state = S_READY;
+      break;
+    default: break;
   }
 }
 struct FRAME * get_frame()
