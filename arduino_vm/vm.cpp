@@ -41,15 +41,15 @@ void dump() //Pretty Show Memory For Debugging
   printf(get_flash_str(MSG_VM_DUMP_HEADER2_FMT), ADDER, "");
   for (i = 0; i < COLS; i++)
   {
-    printf(get_flash_str(TITLE_FORMAT), i);
+    printf(TITLE_FORMAT, i);
   }
   for (i = 0; i < MAX_MEM; i++)
   {
     if (i % COLS == 0)
     {
-      printf(get_flash_str(COL_HEADER_FORMAT), i / COLS);
+      printf(COL_HEADER_FORMAT, i / COLS);
     }
-    printf(get_flash_str(DATA_FORMAT), MEM[i]);
+    printf(DATA_FORMAT, MEM[i]);
   }
   puts("\n");
 }
@@ -166,36 +166,19 @@ void run_code(u16 *fbuf, u8 sz)
 {
   init_SML();
   memcpy(MEM, fbuf, sz * sizeof(u16));
-  puts("run code:");
-  for (int i = 0; i < sz; i++)
-  {
-    printf("%2d:%04x\n", i, MEM[i]);
-  }
-  puts("");
+  //  puts("run code:");
+  //  for (int i = 0; i < sz; i++)
+  //  {
+  //    printf("%2d:%04x\n", i, MEM[i]);
+  //  }
+  //  puts("");
   RUN_VM = true;
 }
 int li = 0;
-int bcd_decode(int n)
-{
-  int ans = 0;
-  u8 sf = 0;
-  while (n > 0)
-  {
-    ans |= (n % 10) << sf;
-    sf += 4;
-    n /= 10;
-  }
-  return ans;
-}
 bool input_single_code(int code)
 {
   MEM[li++] = code;
   printf("%04x\n%02d ? ", code, li);
   return true;
-}
-void help_vm()
-{
-  printf(get_flash_str(MSG_VM_HELP_HEADER_FMT), MAX_MEM, MAX_STACK);
-  puts(get_flash_str(MSG_VM_HELP_CONTENT));
 }
 

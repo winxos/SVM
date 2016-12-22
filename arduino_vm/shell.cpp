@@ -2,19 +2,24 @@
 enum INPUT_STATE {SHELL, INPUT_CODE};
 INPUT_STATE input_state = SHELL;
 u8 cmd_count = 0;
-#define MAX_CMD_COUNT 15
+#define MAX_CMD_COUNT 16
 
 static struct CMD {
   char *_name;
-  char *_help;
+  const char *_help;
   void (*execute)(char args[2][10]);
 } CMDS[MAX_CMD_COUNT];
+char hbuf[80];
+
 static void _help(char args[2][10])
 {
   printf(get_flash_str(MSG_HELP_HEADER_FMT), cmd_count);
+  char hbuf[80], *p;
   for (int i = 0; i < cmd_count; i++)
   {
-    printf(get_flash_str(MSG_HELP_ITMES_FMT), CMDS[i]._name, CMDS[i]._help);
+    p = get_flash_str(CMDS[i]._help);
+    memcpy(hbuf, p, strlen(p) + 1);
+    printf(get_flash_str(MSG_HELP_ITMES_FMT), CMDS[i]._name, hbuf);
   }
 }
 static void _input(char args[2][10])
@@ -28,6 +33,11 @@ static void _input(char args[2][10])
 static void _dump(char args[2][10])
 {
   dump();
+}
+static void _start(char args[2][10])
+{
+  RUN_VM = true;
+  puts(get_flash_str(MSG_VM_START));
 }
 static void _stop(char args[2][10])
 {
@@ -55,7 +65,20 @@ static void _ls(char args[2][10])
 }
 static void _cat(char args[2][10])
 {
-
+  FILE_INFO tmp;
+  if (FILE_SUCCESS == get_file(args[0], &tmp))
+  {
+    u8 index;
+    u16 *sbuf = malloc(tmp.size);
+    read_file(tmp, (u8*)sbuf);
+    printf(get_flash_str(PSTR("'%s' content:\n")), tmp.name);
+    for (int i = 0; i < tmp.size / 2; i++)
+    {
+      printf("%5x", sbuf[i]);
+    }
+    puts("");
+    free(sbuf);
+  }
 }
 static void _rm(char args[2][10])
 {
@@ -70,25 +93,45 @@ static void _kill(char args[2][10])
 {
   puts(get_flash_str(MSG_NOT_FINISHED));
 }
+static void _load(char args[2][10])
+{
+  FILE_INFO f;
+  if (FILE_SUCCESS == get_file(args[0], &f))
+  {
+    u8 *fbuf = malloc(f.size);
+    read_file(f, fbuf);
+    //printf(get_flash_str(MSG_VM_MANAGER_LOADED_CODE_FMT), f.name, f.size);
+    run_code((u16*)fbuf, f.size / sizeof(u16));
+  }
+}
+
 static void _pmode(char args[2][10])
 {
-  puts(get_flash_str(MSG_NOT_FINISHED));
+  u8 p = atoi(args[0]), m = atoi(args[1]);
+  pinMode(p, m);
+  printf(GFS(PSTR("SET PIN %d MODE %d\n")), p, m);
 }
 static void _dread(char args[2][10])
 {
-  puts(get_flash_str(MSG_NOT_FINISHED));
+  u8 p = atoi(args[0]);
+  printf(GFS(PSTR("(PIN %d) = %d\n")), p, digitalRead(p));
 }
 static void _dwrite(char args[2][10])
 {
-  puts(get_flash_str(MSG_NOT_FINISHED));
+  u8 p = atoi(args[0]), m = atoi(args[1]);
+  digitalWrite(p, m);
+  printf(GFS(PSTR("SET (PIN %d) = %d\n")), p, m);
 }
 static void _aread(char args[2][10])
 {
-  puts(get_flash_str(MSG_NOT_FINISHED));
+  u8 p = atoi(args[0]);
+  printf(GFS(PSTR("(PIN %d) = %d\n")), p, analogRead(p));
 }
 static void _awrite(char args[2][10])
 {
-  puts(get_flash_str(MSG_NOT_FINISHED));
+  u8 p = atoi(args[0]), m = atoi(args[1]);
+  analogWrite(p, m);
+  printf(GFS(PSTR("SET (PIN %d) = %d\n")), p, m);
 }
 static int cmd_index(char *s)
 {
@@ -139,7 +182,7 @@ void shell(void)
     }
   }
 }
-static void add_command(char *cname, void(*f)(), char * chelp)
+static void add_command(char *cname, void(*f)(), const char *chelp)
 {
   assert(chelp != NULL);
   CMDS[cmd_count]._name = cname;
@@ -149,19 +192,21 @@ static void add_command(char *cname, void(*f)(), char * chelp)
 }
 void init_shell()
 {
-  add_command("ls", _ls, LS_HELP);
-  add_command("cat", _cat, CAT_HELP);
-  add_command("rm", _rm, RM_HELP);
-  add_command("ps", _ps, PS_HELP);
-  add_command("kill", _rm, KILL_HELP);
-  add_command("dump", _dump, DUMP_HELP);
-  add_command("stop", _stop, STOP_HELP);
-  add_command("input", _input, INPUT_HELP);
-  add_command("pmode", _pmode, PMOD_HELP);
-  add_command("dread", _dread, DREAD_HELP);
-  add_command("dwrite", _dwrite, DWRITE_HELP);
-  add_command("aread", _aread, AREAD_HELP);
-  add_command("awrite", _awrite, AWRITE_HELP);
-  add_command("help", _help, HELP_HELP);
+  add_command("ls", _ls, PSTR("LIST FILES"));
+  add_command("cat", _cat, PSTR("SHOW FILE CONTENT"));
+  add_command("rm", _rm, PSTR("REMOVE FILE"));
+  add_command("ps", _ps, PSTR("PROCESS STATE"));
+  add_command("kill", _kill, PSTR("KILL ID"));
+  add_command("dump", _dump, PSTR("SHOW MEMERY"));
+  add_command("start", _start, PSTR("START VM"));
+  add_command("stop", _stop, PSTR("STOP VM"));
+  add_command("input", _input, PSTR("INPUT CODE MODE"));
+  add_command("load", _load, PSTR("LOAD CODE"));
+  add_command("pmode", _pmode, PSTR("PMOD PIN 0/1/2"));
+  add_command("dread", _dread, PSTR("DIGITAL READ PIN"));
+  add_command("dwrite", _dwrite, PSTR("DIGITAL WRITE PIN 0/1"));
+  add_command("aread", _aread, PSTR("ANALOG READ"));
+  add_command("awrite", _awrite, PSTR("ANALOG WRITE PIN 0-255"));
+  add_command("help", _help, PSTR("HELP"));
 }
 

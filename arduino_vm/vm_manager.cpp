@@ -6,8 +6,8 @@ void startup_code()
   {
     u8 *fbuf = malloc(f.size);
     read_file(f, fbuf);
-    printf(get_flash_str(MSG_VM_MANAGER_LOADED_CODE_FMT), f.name, f.size);
-    run_code((u16*)fbuf, f.size / 2);
+    //printf(get_flash_str(MSG_VM_MANAGER_LOADED_CODE_FMT), f.name, f.size);
+    run_code((u16*)fbuf, f.size / sizeof(u16));
   }
 }
 void vm_init()

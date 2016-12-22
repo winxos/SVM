@@ -10,6 +10,7 @@
 typedef unsigned char u8;
 typedef unsigned short u16;
 #include "string_table.h"
+#define GFS get_flash_str
 extern char STR_MEM_BUF[80];
 extern char *get_flash_str(char *str);
 /* public.cpp     */
@@ -19,6 +20,7 @@ extern int split(char dst[][10], char *str, const char *spl);
 extern void vm_init();
 extern void serialEvent();
 extern void vm_run_command();
+
 /* protocol.cpp   */
 #define BUF_MAX_LEN 80
 
