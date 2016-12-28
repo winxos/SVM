@@ -6,14 +6,14 @@
 import glob
 import sys
 
-keywords = {"INPUT": 10, "PRINT": 11,
-            "LOAD": 20, "STORE": 21, "SET": 22,
-            "ADD": 30, "SUB": 31, "MUL": 32, "DIV": 33, "MOD": 34, "INC": 35, "DEC": 36, "NEG": 37,
-            "JMP": 40, "JMPN": 41, "JMPZ": 42, "HALT": 43,
-            "AND": 50, "OR": 51, "XOR": 52,
-            "PUSH": 60, "POP": 61,"SREGA":62,"SREGB":63,"SREGC":64,"SREGD":65,
-            "PMOD":70,"DWP":71,"DRP":72,"AWP":73,"ARP":74,
-            "SLP":80
+keywords = {"INPUT": 0x10, "PRINT": 0x11,
+            "LOAD": 0x20, "STORE": 0x21, "SET": 0x22,
+            "ADD": 0x30, "SUB": 31, "MUL": 32, "DIV": 0x33, "MOD": 0x34, "INC": 0x35, "DEC": 0x36, "NEG": 0x37,
+            "JMP": 0x40, "JMPN": 0x41, "JMPZ": 0x42, "HALT": 0x43,
+            "AND": 0x50, "OR": 0x51, "XOR": 0x52,
+            "PUSH": 0x60, "POP": 0x61, "SREGA": 0x62, "SREGB": 0x63, "SREGC": 0x64, "SREGD": 0x65,
+            "PMOD": 0x70, "DWP": 0x71, "DRP": 0x72, "AWP": 0x73, "ARP": 0x74,
+            "SLP": 0x80
             };
 var_table = {}
 label_table = {}
@@ -71,18 +71,18 @@ def translate(codes):
                 if code[1] in var_table:
                     operand = var_table[code[1]]
                 elif code[0] == "SET" or code[0] == "PMOD" or code[0] == "DWP" or code[0] == "DRP" \
-                        or code[0] == "AWP"or code[0] == "ARP"or code[0] == "SLP":
+                        or code[0] == "AWP" or code[0] == "ARP" or code[0] == "SLP":
                     operand = int(code[1])
                 else:
                     print("[error] VAR %s NOT FOUND." % code[1])
                     return;
             else:
                 if code[0] == "HALT" or code[0] == "PUSH" or code[0] == "POP" \
-                        or code[0]=="SREGA" or code[0]=="SREGB" or code[0]=="SREGC" or code[0]=="SREGD":
+                        or code[0] == "SREGA" or code[0] == "SREGB" or code[0] == "SREGC" or code[0] == "SREGD":
                     pass
                 else:
                     print("[waring] LINE % MISS OPERAND." % index)
-        ml.append("%02d%02d" % (operator, operand))
+        ml.append("%02x%02x" % (operator, operand))
     return ("\n").join(ml)
 
 
