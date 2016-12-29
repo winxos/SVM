@@ -52,7 +52,10 @@ def translate(codes):
     ml = []
     for index, code in enumerate(codes):
         if index >= len(codes) - len(var_table):
-            ml += (codes[-len(var_table):])
+            print(codes[-len(var_table):])
+            for i in (codes[-len(var_table):]):
+                ml.append(int(i) // 256)
+                ml.append(int(i) % 256)
             break
         operator = keywords[code[0]]
         operand = 0
@@ -82,15 +85,18 @@ def translate(codes):
                     pass
                 else:
                     print("[waring] LINE % MISS OPERAND." % index)
-        ml.append("%02x%02x" % (operator, operand))
-    return ("\n").join(ml)
+        # ml.append("%02x%02x" % (operator, operand))
+        ml.append(operator)
+        ml.append(operand)
+    # return ("\n").join(ml)
+    return ml
 
 
 def deal_sal(n):
     fn = str(n).split(".")[0] + ".sml"
     try:
-        with open(n) as fi, open(fn, "w") as fo:
-            fo.write(translate(pretranslate(fi.read().split("\n"))))
+        with open(n) as fi, open(fn, "wb") as fo:
+            fo.write(bytearray(translate(pretranslate(fi.read().split("\n")))))
             print("[success] ASSEMBLY FILE %s TO %s" % (n, fn))
     except IOError as e:
         print("[error] %s" % str(e))
